@@ -10,30 +10,36 @@ export default class ServerlessBetterCredentials implements Plugin {
 
   private serverless: Serverless;
 
-  constructor(serverless: Serverless, _: unknown, { log }: Plugin.Logging) {
+  constructor(
+    serverless: Serverless,
+    _?: unknown, // no options are supported
+    context?: Plugin.Logging, // it is not clear context is always available
+  ) {
+    const log = context?.log || console;
+
     this.serverless = serverless;
     this.provider = this.serverless.getProvider('aws') as unknown as AwsProvider;
 
     if (!this.provider) {
-      log.error('ServerlessBetterCredentials: AWS provider not found');
+      log.error('serverless-better-credentials: only AWS is supported');
       return;
     }
 
     this.provider.getCredentials = getCredentials;
-    log.info('ServerlessBetterCredentials: loaded');
+    log.debug('serverless-better-credentials: provider.getCredentials patched');
 
     this.hooks = { initialize: () => this.init() };
   }
 
   async init() {
-    // serverless treats the credentials object as if it is a synchronous and static map of
-    // { accessKeyId, secretAccessKey }.
-    // however many types of AWS credentials mutate (refresh) over time and are asynchronous.
+    // Serverless treats the credentials object as if it is a synchronous and static map of
+    // { accessKeyId, secretAccessKey, sessionToken? }.
+    // However many types of AWS credentials mutate (refresh) over time and are asynchronous on
+    // first access.
 
-    // by running getPromise() on the plug-in initialisation we can mimic an environment where
-    // the id and secret key are set immediately, while still providing a valid credentials
-    // object for the aws-sdk, etc. that supports refreshing.
-
+    // By running getPromise() on the (awaited) plug-in initialisation we can mimic an environment
+    // where the key id, secret and token are set immediately, while still providing a valid
+    // credentials class for the aws-sdk, etc. that supports refreshing.
     const { credentials } = this.provider.getCredentials();
     await credentials.getPromise();
   }

@@ -1,6 +1,10 @@
 import { AwsProvider, ServerlessAwsCredentials } from '../types';
 import AwsCredentials from './AwsCredentials';
 
+/*
+ * This function replaces the existing AWS Provider getCredentials() implementation.
+ * It will run within the context of the AWS Provider class.
+ */
 export default function getCredentials(this: AwsProvider): ServerlessAwsCredentials {
   if (this.cachedCredentials) {
     // We have already created the credentials object once, so return it.

@@ -61,20 +61,12 @@ export default class AwsCredentials extends AWS.Credentials {
     });
   }
 
-  /**
-   * Add credentials, if present and valid, from provider config
-   * @param credentials The credentials to test for validity
-   */
   addConfig(credentials?: Partial<CredentialsOptions>) {
     if (isCredentialsOptions(credentials)) {
       this.chain.providers.push(new AWS.Credentials(credentials));
     }
   }
 
-  /**
-   * Add credentials, if present, from the environment
-   * @param prefix The environment variable prefix to use in extracting credentials
-   */
   addEnvironment(prefix?: string) {
     if (prefix) {
       const environmentCredentials = new AWS.EnvironmentCredentials(prefix);
@@ -82,10 +74,6 @@ export default class AwsCredentials extends AWS.Credentials {
     }
   }
 
-  /**
-   * Add credentials from a profile
-   * @param profile The profile to load credentials from
-   */
   addProfile(profile?: string) {
     if (profile) {
       const params: ProfileOptions = { profile };
