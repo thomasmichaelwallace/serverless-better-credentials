@@ -1,6 +1,7 @@
 import AWS, { AWSError } from 'aws-sdk';
 import readline from 'readline';
 import { CredentialsOptions } from '../types';
+import SingleSignOnCredentials from './SingleSignOnCredentials';
 
 interface ProfileOptions {
   // SharedIniFileCredentialsOptions
@@ -36,10 +37,19 @@ function isCredentialsOptions(c?: Partial<CredentialsOptions>): c is Credentials
 export default class AwsCredentials extends AWS.Credentials {
   chain: AWS.CredentialProviderChain;
 
-  constructor() {
+  hints: string[] = [];
+
+  hint = 'No credentials resolved';
+
+  hintShown = false;
+
+  logHintFn: (hint: string) => void;
+
+  constructor(hintFn: (hint: string) => void) {
     super('ACCESS_KEY_ID', 'SECRET_ACCESS_KEY');
     this.expired = true; // force refresh based on chain
     this.chain = new AWS.CredentialProviderChain([]); // providers are added explicitly
+    this.logHintFn = hintFn;
   }
 
   refresh(callback: (err?: AWSError) => void) {
@@ -56,25 +66,34 @@ export default class AwsCredentials extends AWS.Credentials {
         callback(e);
       } else {
         AWS.Credentials.call<AWS.Credentials, CredentialsOptions[]>(this, res);
+        if (!this.hintShown) {
+          this.hintShown = true;
+          this.logHintFn(`credentials resolved ${this.hint}`);
+        }
         callback();
       }
     });
   }
 
-  addConfig(credentials?: Partial<CredentialsOptions>) {
+  addConfig(hint: string, credentials?: Partial<CredentialsOptions>) {
     if (isCredentialsOptions(credentials)) {
-      this.chain.providers.push(new AWS.Credentials(credentials));
+      this.chain.providers.push(() => {
+        this.hint = `from config: ${hint}`;
+        return new AWS.Credentials(credentials);
+      });
     }
   }
 
-  addEnvironment(prefix?: string) {
+  addEnvironment(hint: string, prefix?: string) {
     if (prefix) {
-      const environmentCredentials = new AWS.EnvironmentCredentials(prefix);
-      this.chain.providers.push(environmentCredentials);
+      this.chain.providers.push(() => {
+        this.hint = `from env: ${hint}`;
+        return new AWS.EnvironmentCredentials(prefix);
+      });
     }
   }
 
-  addProfile(profile?: string) {
+  addProfile(hint: string, profile?: string) {
     if (profile) {
       const params: ProfileOptions = { profile };
       if (process.env.AWS_SHARED_CREDENTIALS_FILE) {
@@ -90,8 +109,18 @@ export default class AwsCredentials extends AWS.Credentials {
         });
       };
 
-      this.chain.providers.push(() => new AWS.SharedIniFileCredentials(params));
-      this.chain.providers.push(() => new AWS.ProcessCredentials(params));
+      this.chain.providers.push(() => {
+        this.hint = `from config ini profile: ${hint} (${profile})`;
+        return new AWS.SharedIniFileCredentials(params);
+      });
+      this.chain.providers.push(() => {
+        this.hint = `from config sso profile: ${hint} (${profile})`;
+        return new SingleSignOnCredentials(params);
+      });
+      this.chain.providers.push(() => {
+        this.hint = `from config credential process profile: ${hint} (${profile})`;
+        return new AWS.ProcessCredentials(params);
+      });
     }
   }
 }

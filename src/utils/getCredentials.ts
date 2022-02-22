@@ -1,3 +1,4 @@
+import { log } from '@serverless/utils/log';
 import { AwsProvider, ServerlessAwsCredentials } from '../types';
 import AwsCredentials from './AwsCredentials';
 
@@ -11,25 +12,25 @@ export default function getCredentials(this: AwsProvider): ServerlessAwsCredenti
     return this.cachedCredentials;
   }
 
-  const credentials = new AwsCredentials();
+  const credentials = new AwsCredentials((hint) => { log.success(`serverless-better-credentials: ${hint}`); });
   // AwsCredentials returns the first credentials to resolve, so add from most-to-least specific:
-  credentials.addProfile(this.options['aws-profile']); // CLI option profile
+  credentials.addProfile('cli --aws-profile', this.options['aws-profile']); // CLI option profile
 
   const stageUpper = this.getStage() ? this.getStage().toUpperCase() : undefined;
   if (stageUpper) {
     // stage specific credentials
-    credentials.addProfile(process.env[`AWS_${stageUpper}_PROFILE`]);
-    credentials.addEnvironment(`AWS_${stageUpper}`);
+    credentials.addProfile(`AWS_${stageUpper}_PROFILE_*`, process.env[`AWS_${stageUpper}_PROFILE`]);
+    credentials.addEnvironment(`AWS_${stageUpper}_*`, `AWS_${stageUpper}`);
   }
 
-  credentials.addProfile(process.env.AWS_PROFILE); // credentials for all stages
-  credentials.addEnvironment('AWS');
+  credentials.addProfile('AWS_PROFILE', process.env.AWS_PROFILE); // credentials for all stages
+  credentials.addEnvironment('AWS_*', 'AWS');
 
   if (this.serverless.service.provider.profile && !this.options['aws-profile']) {
-    credentials.addProfile(this.serverless.service.provider.profile);
+    credentials.addProfile('provider.profile', this.serverless.service.provider.profile);
   }
-  credentials.addConfig(this.serverless.service.provider.credentials); // config credentials
-  credentials.addProfile(process.env.AWS_DEFAULT_PROFILE || 'default');
+  credentials.addConfig('provider.credentials', this.serverless.service.provider.credentials); // config credentials
+  credentials.addProfile('AWS_DEFAULT_PROFILE', process.env.AWS_DEFAULT_PROFILE || 'default');
 
   // Store the credentials to avoid creating them again (messes up MFA).
   const region = this.getRegion();
