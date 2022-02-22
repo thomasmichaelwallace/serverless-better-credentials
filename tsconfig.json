@@ -69,6 +69,6 @@
     /* Advanced Options */
     "resolveJsonModule": true                  /* Allow importing .json for tests */
   },
-  "include": ["src"],
+  "include": ["src", "types"],
   "exclude": ["node_modules", "dist", "**/__tests__/*.test.ts"], // do not compile tests
 }
