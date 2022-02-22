@@ -1,0 +1,4 @@
+{
+  "pre-commit": "npm run pre-commit",
+  "commit-msg": "npx commitlint -e $1"
+}

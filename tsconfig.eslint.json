@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "**/__tests__/*.test.ts", "resources"], // include all files when linting
+  "exclude": ["node_modules", "dist"],
+}
