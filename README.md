@@ -2,11 +2,11 @@
 
 The Serverless Better Credentials plugin replaces the existing AWS credential resolution mechanism in the Serverless Framework with an extended version that:
 
-* Supports the [`credential_process`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html) mechanism for sourcing credentials from an external process (used by many SSO workarounds)
-* Respects _all_ of the configuration environmental variables that the javascript aws-sdk v2 supports (e.g. `AWS_SHARED_CREDENTIALS_FILE` / `AWS_SDK_LOAD_CONFIG`)
+* Supports [AWS Single Sign On](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html) natively.
+* Supports the [`credential_process`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html) mechanism for sourcing credentials from an external process.
+* Respects _all_ of the configuration environmental variables that the javascript aws-sdk v2 supports (e.g. `AWS_SHARED_CREDENTIALS_FILE` / `AWS_SDK_LOAD_CONFIG`).
 
-
-It is designed to be a drop-in replacement; respecting the current credentials resolution order and custom extensions already provided by the Serverless Framework.
+It is designed to be a drop-in replacement; respecting the current credentials resolution order and extensions already provided by the Serverless Framework.
 
 ## Usage
 
@@ -28,9 +28,15 @@ plugins:
   # - ... other plugins
 ```
 
-## Credential Resolution
+## AWS Single Sign On (SSO) Support
 
-Credentials are resolved in the same order the serverless framework currently uses. This order is:
+AWS SSO profiles configured to work with the AWS CLI should "just work" when this plugin is enabled. This includes prompting and attempting to automatically open the SSO authorization page in your default browser when the credentials require refreshing.
+
+Full details about how to configure AWS SSO can be found in the [AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html).
+
+## Other Credential Resolution
+
+Credentials are resolved in the same order the Serverless Framework currently uses. This order is:
 
  * from **profile**: cli flag `--aws-profile`
  * from **profile**: env `AWS_${STAGE}_PROFILE`
@@ -42,8 +48,11 @@ Credentials are resolved in the same order the serverless framework currently us
  * from **profile** - `AWS_DEFAULT_PROFILE` || `default`
 
 Where:
- * **profile** credentials attempt to first resolve as [SharedIniFileCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SharedIniFileCredentials.html) and then [ProcessCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/ProcessCredentials.html) (i.e. from AWS CLI config files)
- * **env** credentials resolves as [EnvironmentCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/EnvironmentCredentials.html) (i.e. from the running process environment)
+ * **profile** credentials resolve against the matching `[profile_name]` configuration:
+   * first directly as [SharedIniFileCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SharedIniFileCredentials.html) (i.e. key id/secret or STS role)
+   * then using [ProcessCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/ProcessCredentials.html), if an `credential_process` is specified
+   * then using the built-in [SSO Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html) if `sso_start_url`, etc. is specified
+ * **env** credentials resolve as [EnvironmentCredentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/EnvironmentCredentials.html) (i.e. from the running process environment)
  * **config** credentials resolve directly as [Credentials](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Credentials.html) (i.e. from an explicitly set key id and secret)
 
 ## Help and Support
