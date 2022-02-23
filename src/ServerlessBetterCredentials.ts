@@ -1,3 +1,4 @@
+import { log } from '@serverless/utils/log';
 import Serverless from 'serverless';
 import Plugin from 'serverless/classes/Plugin';
 import { AwsProvider } from './types';
@@ -10,13 +11,7 @@ export default class ServerlessBetterCredentials implements Plugin {
 
   private serverless: Serverless;
 
-  constructor(
-    serverless: Serverless,
-    _?: unknown, // no options are supported
-    context?: Plugin.Logging, // it is not clear context is always available
-  ) {
-    const log = context?.log || console;
-
+  constructor(serverless: Serverless) {
     this.serverless = serverless;
     this.provider = this.serverless.getProvider('aws') as unknown as AwsProvider;
 
@@ -26,7 +21,7 @@ export default class ServerlessBetterCredentials implements Plugin {
     }
 
     this.provider.getCredentials = getCredentials;
-    log.debug('provider.getCredentials patched');
+    log.debug('serverless-better-credentials: provider.getCredentials patched');
 
     this.hooks = { initialize: () => this.init() };
   }
