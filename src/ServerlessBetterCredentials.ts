@@ -26,7 +26,7 @@ export default class ServerlessBetterCredentials implements Plugin {
     }
 
     this.provider.getCredentials = getCredentials;
-    log.debug('serverless-better-credentials: provider.getCredentials patched');
+    log.debug('provider.getCredentials patched');
 
     this.hooks = { initialize: () => this.init() };
   }

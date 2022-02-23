@@ -24,8 +24,28 @@ export type AwsProvider = Omit<Aws, 'getCredentials'> & {
   }
 };
 
-export interface CredentialsOptions {
+export type CredentialsOptions = {
   accessKeyId: string
   secretAccessKey: string
   sessionToken?: string
-}
+};
+
+export type SSOToken = {
+  startUrl: string,
+  region: string,
+  accessToken: string,
+  expiresAt: string, // utc date string
+};
+
+export type ClientInfo = {
+  clientId: string,
+  clientSecret: string,
+  clientSecretExpiresAt: number, // in unix epoch seconds
+};
+
+export type SsoProfileConfig = {
+  sso_account_id: string,
+  sso_region: string,
+  sso_role_name: string,
+  sso_start_url: string,
+};

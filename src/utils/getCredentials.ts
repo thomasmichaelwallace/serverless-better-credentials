@@ -1,6 +1,6 @@
 import { log } from '@serverless/utils/log';
+import AwsCredentials from '../AwsCredentials';
 import { AwsProvider, ServerlessAwsCredentials } from '../types';
-import AwsCredentials from './AwsCredentials';
 
 /*
  * This function replaces the existing AWS Provider getCredentials() implementation.
@@ -11,6 +11,7 @@ export default function getCredentials(this: AwsProvider): ServerlessAwsCredenti
     // We have already created the credentials object once, so return it.
     return this.cachedCredentials;
   }
+  log.debug('first attempt to getting aws credentials');
 
   const credentials = new AwsCredentials((hint) => { log.success(`serverless-better-credentials: ${hint}`); });
   // AwsCredentials returns the first credentials to resolve, so add from most-to-least specific:

@@ -1,6 +1,4 @@
-import { AWSError, IniLoader } from 'aws-sdk';
-
-type PrivateIniLoader = IniLoader & {
+type PrivateIniLoader = AWS.IniLoader & {
   getHomeDir(): string;
 };
 
@@ -9,10 +7,10 @@ type PrivateIniLoader = IniLoader & {
 // to define SSO credentials.
 type Util = {
   defaultProfile: string;
-  error(error: Error, { code: string }): AWSError;
+  error(error: Error, { code: string }): AWS.AWSError;
   fn: {
     noop: () => void;
-    callback: (err?: AWSError) => void;
+    callback: (err?: AWS.AWSError) => void;
   }
   iniLoader: PrivateIniLoader,
   getProfilesFromSharedConfig<C>(
@@ -22,8 +20,7 @@ type Util = {
   readFileSync: (path: string) => string;
 };
 
-declare global {
-  namespace AWS {
-    const util: Util;
-  }
+declare module 'aws-sdk/lib/util' {
+  const util: Util;
+  export default util;
 }

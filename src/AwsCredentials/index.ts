@@ -1,7 +1,7 @@
 import AWS, { AWSError } from 'aws-sdk';
 import readline from 'readline';
+import SsoCredentials from '../SsoCredentials';
 import { CredentialsOptions } from '../types';
-import SingleSignOnCredentials from './SingleSignOnCredentials';
 
 interface ProfileOptions {
   // SharedIniFileCredentialsOptions
@@ -115,7 +115,7 @@ export default class AwsCredentials extends AWS.Credentials {
       });
       this.chain.providers.push(() => {
         this.hint = `from config sso profile: ${hint} (${profile})`;
-        return new SingleSignOnCredentials(params);
+        return new SsoCredentials(params);
       });
       this.chain.providers.push(() => {
         this.hint = `from config credential process profile: ${hint} (${profile})`;
