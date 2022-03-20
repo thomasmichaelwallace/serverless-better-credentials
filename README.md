@@ -34,6 +34,8 @@ AWS SSO profiles configured to work with the AWS CLI should "just work" when thi
 
 Full details about how to configure AWS SSO can be found in the [AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html).
 
+Take note that if you are using SSO with the approach AWS document (a shared `.aws/config` file) you'll also need to set the `AWS_SDK_LOAD_CONFIG` enviornment value to something truthy (e.g. `AWS_SDK_LOAD_CONFIG=1`), as described in the [AWS SDK documentation](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-region.html#setting-region-config-file).
+
 ## Other Credential Resolution
 
 Credentials are resolved in the same order the Serverless Framework currently uses. This order is:
