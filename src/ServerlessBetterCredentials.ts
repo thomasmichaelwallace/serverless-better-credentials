@@ -36,6 +36,19 @@ export default class ServerlessBetterCredentials implements Plugin {
     // where the key id, secret and token are set immediately, while still providing a valid
     // credentials class for the aws-sdk, etc. that supports refreshing.
     const { credentials } = this.provider.getCredentials();
+
+    // It seems we're not the only plugin messing with the credentials object.
+    // Guard against unexpected usage.
+    // https://github.com/thomasmichaelwallace/serverless-better-credentials/issues/5
+    if (
+      !credentials
+      || typeof credentials !== 'object'
+      || typeof credentials.getPromise !== 'function'
+    ) {
+      log.warning('serverless-better-credentials: another plugin has changed the credentials object - skipping');
+      return;
+    }
+
     await credentials.getPromise();
   }
 }
