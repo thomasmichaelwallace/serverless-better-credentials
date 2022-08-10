@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.1.2...v1.1.3) (2022-08-10)
+
+
+### Bug Fixes
+
+* bump dependencies ([2296df4](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/2296df41cbcb05b4350fca8aeb62576b103848dc))
+
 ### [1.1.2](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.1.1...v1.1.2) (2022-04-26)
 
 
