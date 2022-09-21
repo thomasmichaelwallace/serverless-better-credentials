@@ -1,9 +1,15 @@
 import AWS, { AWSError } from 'aws-sdk';
 import AWSUtil from 'aws-sdk/lib/util';
-import path from 'path';
+
+import {
+  AssumeRoleWithSsoSourceProfileCredentialsConfig,
+  ICredentialsFlow,
+  SsoCredentialsConfig,
+} from '../types';
 import isAwsError from '../utils/isAwsError';
-import getSsoConfig from './getSsoConfig';
-import getSsoToken from './getSsoToken';
+import getCredentialsConfig from './getCredentialsConfig';
+import ssoCredentialsFlow from './ssoCredentialsFlow';
+import assumeRoleWithSsoSourceProfileCredentialsFlow from './assumeRoleWithSsoSourceProfileCredentialsFlow';
 
 function handleError(e: unknown, callback: (err?: AWSError) => void): void {
   if (isAwsError(e)) {
@@ -14,15 +20,16 @@ function handleError(e: unknown, callback: (err?: AWSError) => void): void {
   }
 }
 
-function isFullRoleCredentials(
-  c: AWS.SSO.GetRoleCredentialsResponse['roleCredentials'],
-): c is { accessKeyId: string; secretAccessKey: string; sessionToken: string, expiration: number } {
-  if (!c) return false;
-  if (!c.accessKeyId) return false;
-  if (!c.secretAccessKey) return false;
-  if (!c.sessionToken) return false;
-  if (!c.expiration) return false;
-  return true;
+function isSsoCredentialsConfig(
+  c: SsoCredentialsConfig | AssumeRoleWithSsoSourceProfileCredentialsConfig,
+): c is SsoCredentialsConfig {
+  return !!(<SsoCredentialsConfig>c).profile.sso_account_id;
+}
+
+function isAssumeRoleWithSsoSourceProfileCredentialsConfig(
+  c: SsoCredentialsConfig | AssumeRoleWithSsoSourceProfileCredentialsConfig,
+): c is AssumeRoleWithSsoSourceProfileCredentialsConfig {
+  return !!(<AssumeRoleWithSsoSourceProfileCredentialsConfig>c).source;
 }
 
 export default class SsoCredentials extends AWS.Credentials {
@@ -33,6 +40,8 @@ export default class SsoCredentials extends AWS.Credentials {
   private ssoService: AWS.SSO | undefined;
 
   private ssoOidcService: AWS.SSOOIDC | undefined;
+
+  private stsService: AWS.STS | undefined;
 
   constructor(options: {
     profile?: string,
@@ -47,46 +56,35 @@ export default class SsoCredentials extends AWS.Credentials {
 
   load(callback: (err?: AWSError) => void) {
     try {
-      // get valid config, or throw
-      const config = getSsoConfig({ filename: this.filename, profile: this.profile });
+      const config = getCredentialsConfig({ filename: this.filename, profile: this.profile });
 
-      // get access token
-      if (!this.ssoOidcService || this.ssoOidcService.config.region !== config.sso_region) {
-        this.ssoOidcService = new AWS.SSOOIDC({ region: config.sso_region });
+      let flow: ICredentialsFlow;
+      let ssoRegion: string;
+      if (isSsoCredentialsConfig(config)) {
+        flow = ssoCredentialsFlow;
+        ssoRegion = config.profile.sso_region;
+      } else if (isAssumeRoleWithSsoSourceProfileCredentialsConfig(config)) {
+        flow = assumeRoleWithSsoSourceProfileCredentialsFlow;
+        ssoRegion = config.source.sso_region;
+      } else {
+        throw new Error('AWS profile configuration mismatch.');
       }
-      const getSsoTokenParams = {
-        cacheBasePath: path.join(
-          AWSUtil.iniLoader.getHomeDir(),
-          '.aws',
-          'sso',
-          'cache',
-        ),
-        region: config.sso_region,
-        startUrl: config.sso_start_url,
-      };
 
-      getSsoToken(this.ssoOidcService, getSsoTokenParams)
-        .then((token) => {
-          // get sso role
-          if (!this.ssoService || this.ssoService.config.region !== config.sso_region) {
-            this.ssoService = new AWS.SSO({ region: config.sso_region });
-          }
-          const getRoleCredentialsParams: AWS.SSO.GetRoleCredentialsRequest = {
-            accessToken: token.accessToken,
-            accountId: config.sso_account_id,
-            roleName: config.sso_role_name,
-          };
-          return this.ssoService.getRoleCredentials(getRoleCredentialsParams).promise();
-        })
-        .then(({ roleCredentials }) => {
-          if (!isFullRoleCredentials(roleCredentials)) {
-            throw new Error('An error occurred fetching SSO credentials role');
-          }
-          this.expired = false;
-          this.accessKeyId = roleCredentials.accessKeyId;
-          this.secretAccessKey = roleCredentials.secretAccessKey;
-          this.sessionToken = roleCredentials.sessionToken;
-          this.expireTime = new Date(roleCredentials.expiration);
+      if (!this.ssoOidcService || this.ssoOidcService.config.region !== ssoRegion) {
+        this.ssoOidcService = new AWS.SSOOIDC({ region: ssoRegion });
+      }
+
+      if (!this.ssoService || this.ssoService.config.region !== ssoRegion) {
+        this.ssoService = new AWS.SSO({ region: ssoRegion });
+      }
+
+      flow(config, { ssoService: this.ssoService, ssoOidcService: this.ssoOidcService, stsService: this.stsService })
+        .then((response) => {
+          this.expired = response.expired;
+          this.accessKeyId = response.accessKeyId;
+          this.secretAccessKey = response.secretAccessKey;
+          this.sessionToken = response.sessionToken;
+          this.expireTime = response.expireTime;
           callback();
         })
         .catch((e) => { handleError(e, callback); });

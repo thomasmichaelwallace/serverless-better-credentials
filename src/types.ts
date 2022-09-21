@@ -43,9 +43,51 @@ export type ClientInfo = {
   clientSecretExpiresAt: number, // in unix epoch seconds
 };
 
+export type ProfileConfig = {
+  sso_account_id?: string,
+  sso_region?: string,
+  sso_role_name?: string,
+  sso_start_url?: string,
+  role_arn?: string,
+  source_profile?: string,
+}
+
 export type SsoProfileConfig = {
   sso_account_id: string,
   sso_region: string,
   sso_role_name: string,
   sso_start_url: string,
 };
+
+export type RoleProfileConfig = {
+  role_arn: string,
+  source_profile: string,
+}
+
+export type SsoCredentialsConfig = {
+  profile: SsoProfileConfig
+}
+
+export type AssumeRoleWithSsoSourceProfileCredentialsConfig = {
+  profile: RoleProfileConfig
+  source: SsoProfileConfig
+}
+
+export type AwsTemporaryCredentials = {
+  accessKeyId: string;
+  expired: boolean;
+  expireTime: Date;
+  secretAccessKey: string;
+  sessionToken: string;
+};
+
+export interface ICredentialsFlow {
+  (
+    config: any,
+    services: {
+      ssoOidcService: AWS.SSOOIDC;
+      ssoService: AWS.SSO;
+      stsService: AWS.STS | undefined;
+    },
+  ): Promise<AwsTemporaryCredentials>;
+}
