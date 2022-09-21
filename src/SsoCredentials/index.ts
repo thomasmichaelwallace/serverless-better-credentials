@@ -1,15 +1,13 @@
 import AWS, { AWSError } from 'aws-sdk';
 import AWSUtil from 'aws-sdk/lib/util';
 
-import {
-  AssumeRoleWithSsoSourceProfileCredentialsConfig,
+import { AssumeRoleWithSsoSourceProfileCredentialsConfig,
   ICredentialsFlow,
-  SsoCredentialsConfig,
-} from '../types';
+  SsoCredentialsConfig } from '../types';
 import isAwsError from '../utils/isAwsError';
+import assumeRoleWithSsoSourceProfileCredentialsFlow from './assumeRoleWithSsoSourceProfileCredentialsFlow';
 import getCredentialsConfig from './getCredentialsConfig';
 import ssoCredentialsFlow from './ssoCredentialsFlow';
-import assumeRoleWithSsoSourceProfileCredentialsFlow from './assumeRoleWithSsoSourceProfileCredentialsFlow';
 
 function handleError(e: unknown, callback: (err?: AWSError) => void): void {
   if (isAwsError(e)) {
@@ -78,7 +76,11 @@ export default class SsoCredentials extends AWS.Credentials {
         this.ssoService = new AWS.SSO({ region: ssoRegion });
       }
 
-      flow(config, { ssoService: this.ssoService, ssoOidcService: this.ssoOidcService, stsService: this.stsService })
+      flow(config, {
+        sso: this.ssoService,
+        ssoOidc: this.ssoOidcService,
+        sts: this.stsService,
+      })
         .then((response) => {
           this.expired = response.expired;
           this.accessKeyId = response.accessKeyId;
@@ -87,7 +89,9 @@ export default class SsoCredentials extends AWS.Credentials {
           this.expireTime = response.expireTime;
           callback();
         })
-        .catch((e) => { handleError(e, callback); });
+        .catch((e) => {
+          handleError(e, callback);
+        });
     } catch (e) {
       handleError(e, callback);
     }

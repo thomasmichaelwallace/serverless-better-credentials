@@ -1,18 +1,16 @@
 import AWS from 'aws-sdk';
-import path from 'path';
 import AWSUtil from 'aws-sdk/lib/util';
+import path from 'path';
 
-import {
-  AssumeRoleWithSsoSourceProfileCredentialsConfig,
-  AwsTemporaryCredentials,
-} from 'src/types';
-import getSsoToken from './getSsoToken';
+import { AssumeRoleWithSsoSourceProfileCredentialsConfig,
+  AwsTemporaryCredentials } from 'src/types';
+import isAssumeRoleCredentials from '../utils/isAssumeRoleCredentials';
 import isFullRoleCredentials from '../utils/isFullRoleCredentials';
-import isAssumeRoleCredentials from '../utils//isAssumeRoleCredentials';
+import getSsoToken from './getSsoToken';
 
 export default async function assumeRoleWithSsoSourceProfileCredentialsFlow(
   config: AssumeRoleWithSsoSourceProfileCredentialsConfig,
-  services: { ssoOidcService: AWS.SSOOIDC; ssoService: AWS.SSO; stsService: AWS.STS | undefined },
+  services: { ssoOidc: AWS.SSOOIDC; sso: AWS.SSO; sts: AWS.STS | undefined },
 ): Promise<AwsTemporaryCredentials> {
   const getSsoTokenParams = {
     cacheBasePath: path.join(AWSUtil.iniLoader.getHomeDir(), '.aws', 'sso', 'cache'),
@@ -20,14 +18,14 @@ export default async function assumeRoleWithSsoSourceProfileCredentialsFlow(
     startUrl: config.source.sso_start_url,
   };
 
-  return getSsoToken(services.ssoOidcService, getSsoTokenParams)
+  return getSsoToken(services.ssoOidc, getSsoTokenParams)
     .then((token) => {
       const getRoleCredentialsParams: AWS.SSO.GetRoleCredentialsRequest = {
         accessToken: token.accessToken,
         accountId: config.source.sso_account_id,
         roleName: config.source.sso_role_name,
       };
-      return services.ssoService.getRoleCredentials(getRoleCredentialsParams).promise();
+      return services.sso.getRoleCredentials(getRoleCredentialsParams).promise();
     })
     .then(({ roleCredentials }) => {
       if (!isFullRoleCredentials(roleCredentials)) {
@@ -35,12 +33,13 @@ export default async function assumeRoleWithSsoSourceProfileCredentialsFlow(
       }
 
       if (
-        !services.stsService ||
-        services.stsService.config.credentials?.accessKeyId !== roleCredentials.accessKeyId ||
-        services.stsService.config.credentials?.secretAccessKey !== roleCredentials.secretAccessKey ||
-        services.stsService.config.credentials?.sessionToken !== roleCredentials.sessionToken
+        !services.sts
+        || services.sts.config.credentials?.accessKeyId !== roleCredentials.accessKeyId
+        || services.sts.config.credentials?.secretAccessKey !== roleCredentials.secretAccessKey
+        || services.sts.config.credentials?.sessionToken !== roleCredentials.sessionToken
       ) {
-        services.stsService = new AWS.STS({
+        // eslint-disable-next-line no-param-reassign
+        services.sts = new AWS.STS({
           credentials: {
             accessKeyId: roleCredentials.accessKeyId,
             secretAccessKey: roleCredentials.secretAccessKey,
@@ -54,7 +53,7 @@ export default async function assumeRoleWithSsoSourceProfileCredentialsFlow(
         RoleSessionName: `serverless-better-credentials-${new Date().getTime()}`,
       };
 
-      return services.stsService.assumeRole(assumeRoleParams).promise();
+      return services.sts.assumeRole(assumeRoleParams).promise();
     })
     .then(({ Credentials }) => {
       if (!isAssumeRoleCredentials(Credentials)) {

@@ -1,12 +1,12 @@
-import path from 'path';
 import AWSUtil from 'aws-sdk/lib/util';
+import path from 'path';
 import { AwsTemporaryCredentials, SsoCredentialsConfig } from 'src/types';
-import getSsoToken from './getSsoToken';
 import isFullRoleCredentials from '../utils/isFullRoleCredentials';
+import getSsoToken from './getSsoToken';
 
 export default async function ssoCredentialsFlow(
   config: SsoCredentialsConfig,
-  services: { ssoOidcService: AWS.SSOOIDC; ssoService: AWS.SSO  },
+  services: { ssoOidc: AWS.SSOOIDC; sso: AWS.SSO },
 ): Promise<AwsTemporaryCredentials> {
   const getSsoTokenParams = {
     cacheBasePath: path.join(AWSUtil.iniLoader.getHomeDir(), '.aws', 'sso', 'cache'),
@@ -14,14 +14,14 @@ export default async function ssoCredentialsFlow(
     startUrl: config.profile.sso_start_url,
   };
 
-  return getSsoToken(services.ssoOidcService, getSsoTokenParams)
+  return getSsoToken(services.ssoOidc, getSsoTokenParams)
     .then((token) => {
       const getRoleCredentialsParams: AWS.SSO.GetRoleCredentialsRequest = {
         accessToken: token.accessToken,
         accountId: config.profile.sso_account_id,
         roleName: config.profile.sso_role_name,
       };
-      return services.ssoService.getRoleCredentials(getRoleCredentialsParams).promise();
+      return services.sso.getRoleCredentials(getRoleCredentialsParams).promise();
     })
     .then(({ roleCredentials }) => {
       if (!isFullRoleCredentials(roleCredentials)) {

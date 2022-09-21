@@ -50,7 +50,7 @@ export type ProfileConfig = {
   sso_start_url?: string,
   role_arn?: string,
   source_profile?: string,
-}
+};
 
 export type SsoProfileConfig = {
   sso_account_id: string,
@@ -62,16 +62,16 @@ export type SsoProfileConfig = {
 export type RoleProfileConfig = {
   role_arn: string,
   source_profile: string,
-}
+};
 
 export type SsoCredentialsConfig = {
   profile: SsoProfileConfig
-}
+};
 
 export type AssumeRoleWithSsoSourceProfileCredentialsConfig = {
   profile: RoleProfileConfig
   source: SsoProfileConfig
-}
+};
 
 export type AwsTemporaryCredentials = {
   accessKeyId: string;
@@ -83,11 +83,12 @@ export type AwsTemporaryCredentials = {
 
 export interface ICredentialsFlow {
   (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     config: any,
     services: {
-      ssoOidcService: AWS.SSOOIDC;
-      ssoService: AWS.SSO;
-      stsService: AWS.STS | undefined;
+      ssoOidc: AWS.SSOOIDC;
+      sso: AWS.SSO;
+      sts: AWS.STS | undefined;
     },
   ): Promise<AwsTemporaryCredentials>;
 }

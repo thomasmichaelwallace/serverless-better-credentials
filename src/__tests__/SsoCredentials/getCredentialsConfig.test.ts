@@ -9,26 +9,26 @@ describe('sum module', () => {
     getHomeDir: jest.fn(),
   };
 
-  test('Should thtow an error when profile name is not provided', () => {
+  it('should thtow an error when profile name is not provided', () => {
     // given
     const options = { profile: undefined };
     // when
     expect(() => getCredentialsConfig(options, getProfiles, iniLoader))
       // then
-      .toThrowError(/Cannot load SSO credentials without a profile/);
+      .toThrow(/Cannot load SSO credentials without a profile/);
   });
 
-  test('should throw an error when source profile is not set', () => {
+  it('should throw an error when source profile is not set', () => {
     // given
     const options = { profile: 'profile_one' };
     getProfiles.mockReturnValue({ [options.profile]: { role_arn: 'role_arn' } });
     // when
     expect(() => getCredentialsConfig(options, getProfiles, iniLoader))
       // then
-      .toThrowError(/source_profile is not set using profile/);
+      .toThrow(/source_profile is not set using profile/);
   });
 
-  test('should throw an error when source profile does not exist', () => {
+  it('should throw an error when source profile does not exist', () => {
     // given
     const options = { profile: 'profile_one' };
     const profiles = { [options.profile]: { role_arn: 'role_arn', source_profile: 'source_profile_name' } };
@@ -36,10 +36,10 @@ describe('sum module', () => {
     // when
     expect(() => getCredentialsConfig(options, getProfiles, iniLoader))
       // then
-      .toThrowError(/source_profile \S+ of the profile \S.+ does not exist/);
+      .toThrow(/source_profile \S+ of the profile \S.+ does not exist/);
   });
 
-  test('should throw an error when source profile is not sso profile', () => {
+  it('should throw an error when source profile is not sso profile', () => {
     // given
     const options = { profile: 'profile_one' };
     const profile = { role_arn: 'role_arn', source_profile: 'source_profile_name' };
@@ -49,10 +49,10 @@ describe('sum module', () => {
     // when
     expect(() => getCredentialsConfig(options, getProfiles, iniLoader))
       // then
-      .toThrowError(/Source profile of \S+ does not have valid SSO credentials/);
+      .toThrow(/Source profile of \S+ does not have valid SSO credentials/);
   });
 
-  test('should throw an error when config is not valid sso profile', () => {
+  it('should throw an error when config is not valid sso profile', () => {
     // given
     const options = { profile: 'profile_one' };
     const profile = { sso_account_id: 'id_id_123' };
@@ -61,10 +61,10 @@ describe('sum module', () => {
     // when
     expect(() => getCredentialsConfig(options, getProfiles, iniLoader))
       // then
-      .toThrowError(/Profile \S+ does not have valid SSO credentials/);
+      .toThrow(/Profile \S+ does not have valid SSO credentials/);
   });
 
-  test('should return sso profile config', () => {
+  it('should return sso profile config', () => {
     // given
     const options = { profile: 'profile_one' };
     const profile = {
@@ -88,7 +88,7 @@ describe('sum module', () => {
     });
   });
 
-  test('should return role profile and source sso profile config', () => {
+  it('should return role profile and source sso profile config', () => {
     // given
     const options = { profile: 'profile_one' };
     const profile = { role_arn: 'role_arn', source_profile: 'source_profile_name' };
