@@ -12,8 +12,6 @@
  *  configuration.
 */
 
-const { rules: airbnbEs6Rules } = require('eslint-config-airbnb-base/rules/es6');
-const { rules: airbnbImportRules } = require('eslint-config-airbnb-base/rules/imports');
 const { rules: airbnbStyleRules } = require('eslint-config-airbnb-base/rules/style');
 
 // https://eslint.org/docs/user-guide/configuring
@@ -25,22 +23,6 @@ const js = {
     'airbnb-base',
   ],
   rules: {
-    // es6
-    'sort-imports': [
-      'warn',
-      {
-        ...airbnbEs6Rules['sort-imports'][1],
-        ignoreDeclarationSort: true, // import/order handles this better
-      },
-    ],
-    // imports
-    'import/order': [
-      'error',
-      {
-        alphabetize: { order: 'asc' },
-        ...airbnbImportRules['import/order'][1], //
-      },
-    ],
     // style
     'object-curly-newline': [
       'error',

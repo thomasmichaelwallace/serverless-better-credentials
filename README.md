@@ -60,3 +60,12 @@ Where:
 ## Help and Support
 
 If you have an issue, suggestion, or want to contribute, please open an issue or create a pull request and I'll take a look.
+
+### Troubleshooting
+
+There are a handful of common issues that people have trying to run this plugin. Mostly they surround either the confusing way that AWS resolves credentials, or the way that the Serverless Framework loads plugins.
+
+It's always worth trying the following steps (but feel free to raise an issue if you're still having problems):
+
+* If you're using an `~/.aws/config` file, make sure you have `AWS_SDK_LOAD_CONFIG=1` set in your environment
+* Make sure you're not using a global installation of serverless (e.g. run `npm install --save-dev serverless` in your project directory)
