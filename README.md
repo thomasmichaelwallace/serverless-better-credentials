@@ -13,7 +13,7 @@ It is designed to be a drop-in replacement; respecting the current credentials r
 1. Install
 
 ```bash
-npm install --dev serverless-better-credentials
+npm install --save-dev serverless-better-credentials
 # or
 yarn add --dev serverless-better-credentials
 ```
