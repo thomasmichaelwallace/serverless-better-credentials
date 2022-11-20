@@ -37,13 +37,11 @@ function isCredentialsOptions(c?: Partial<CredentialsOptions>): c is Credentials
 export default class AwsCredentials extends AWS.Credentials {
   chain: AWS.CredentialProviderChain;
 
-  hints: string[] = [];
-
-  hint = 'No credentials resolved';
+  private hint = 'No credentials resolved';
 
   hintShown = false;
 
-  logHintFn: (hint: string) => void;
+  private logHintFn: (hint: string) => void;
 
   constructor(hintFn: (hint: string) => void) {
     super('ACCESS_KEY_ID', 'SECRET_ACCESS_KEY');
