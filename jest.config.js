@@ -12,7 +12,8 @@ const config = {
   transform: {
     '^.+\\.(j|t)s$': 'ts-jest',
   },
-  setupFilesAfterEnv: ['jest-extended', './resources/jest-transforms/jest-extended.ts', './resources/jest-transforms/jest.m.ts'],
+  setupFiles: ['./resources/jest-transforms/clear-env.ts'],
+  setupFilesAfterEnv: ['jest-extended', './resources/jest-transforms/jest-extended.ts', './resources/jest-transforms/jest-m.ts'],
 };
 
 module.exports = config;

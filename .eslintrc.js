@@ -87,6 +87,7 @@ const jest = {
     // 'jest/require-hook' - if anything, avoid hooks
     // 'jest/require-to-throw-message' - unnecessarily restrictive
     // 'jest/require-top-level-describe' - unnecessary given test-runner filenames
+    '@typescript-eslint/unbound-method': 'off',
   },
   globals: {
     m: 'readonly',
