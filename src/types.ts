@@ -1,3 +1,4 @@
+import { IniFileContent, IniLoader, LoadFileOptions } from 'aws-sdk/lib/shared-ini/ini-loader';
 import Serverless from 'serverless';
 import Aws from 'serverless/plugins/aws/provider/awsProvider';
 
@@ -48,4 +49,16 @@ export type SsoProfileConfig = {
   sso_region: string,
   sso_role_name: string,
   sso_start_url: string,
+  sso_session?: string,
 };
+
+export type ConfigData = {
+  config: IniFileContent;
+  keys: string[];
+  values: Record<string, string>[];
+};
+
+export type SsoIniLoader =
+   IniLoader & {
+     loadSsoSessionsFrom(options: LoadFileOptions): IniFileContent;
+   };
