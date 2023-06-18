@@ -9,7 +9,7 @@ import AWS from 'aws-sdk';
 const s3 = new AWS.S3();
 s3.apiVersions = ['2006-03-01'];
 
-test('it loads the sso config from a file', () => {
+test('it loads the sso config from a file with the old SSO login', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'serverless-better-credentials-test-'));
   const configPath = path.join(dir, 'config');
 
@@ -27,6 +27,42 @@ sso_role_name = MyRole
     sso_account_id: '1234',
     sso_region: 'eu-west-1',
     sso_role_name: 'MyRole',
+    sso_start_url: 'https://testing.awsapps.com/start',
+  });
+
+  fs.rmSync(dir, { recursive: true });
+});
+
+test('it loads the sso config from a file with the new SSO login', () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'serverless-better-credentials-test-'),
+  );
+  const configPath = path.join(dir, 'config');
+
+  fs.writeFileSync(
+    configPath,
+    `
+      [testing]
+      sso_start_url = https://testing.awsapps.com/start
+      sso_region = eu-west-1
+      sso_account_id = 1234
+      sso_role_name = MyRole
+      sso_session = test-session
+
+      [sso-session test-session]
+      sso_start_url = https://testing.awsapps.com/start
+      sso_region = eu-west-1
+      sso_registration_scopes = sso:account:access
+  `,
+  );
+
+  const config = getSsoConfig({ filename: configPath, profile: 'testing' });
+
+  expect(config).toEqual({
+    sso_account_id: '1234',
+    sso_region: 'eu-west-1',
+    sso_role_name: 'MyRole',
+    sso_session: 'test-session',
     sso_start_url: 'https://testing.awsapps.com/start',
   });
 
