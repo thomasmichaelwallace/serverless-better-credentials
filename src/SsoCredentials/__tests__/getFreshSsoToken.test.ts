@@ -1,5 +1,5 @@
-import open from 'open';
 import { log } from '@serverless/utils/log';
+import open from 'open';
 import { ClientInfo } from '../../types';
 import getFreshSsoToken from '../getFreshSsoToken';
 
@@ -51,6 +51,7 @@ test('it interactively completes the SSO flow', async () => {
     startUrl: 'https://test.awsapps.com/start',
     region: 'us-east-1',
     accessToken: 'access-token',
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     expiresAt: expect.any(String),
   });
   expect(new Date(response.expiresAt).getTime()).toBeGreaterThan(Date.now());
