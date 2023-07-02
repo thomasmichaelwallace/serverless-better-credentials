@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.1.3...v1.2.0) (2023-07-02)
+
+
+### Features
+
+* complete test suite ([37bf081](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/37bf081eae2c8b225889bc628d8727ad2597dd15)), closes [#3](https://github.com/thomasmichaelwallace/serverless-better-credentials/issues/3)
+* recode init load for new sso login ([97c77bf](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/97c77bfec0b0eed7088caf11147a645d0e0d1022))
+
+
+### Bug Fixes
+
+* clear env and promote m utility in tests ([9ea839d](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/9ea839d4d1e6ae86ad1f5b334101e3719a29738c))
+* correct npm install command ([2126527](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/2126527518784e334ae4484458bde897575cd899))
+* get upstream aws-sdk sso fixes ([168d76a](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/168d76a105b1ce4b6442e1763630f08afe5a3921))
+
 ### [1.1.3](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.1.2...v1.1.3) (2022-08-10)
 
 
