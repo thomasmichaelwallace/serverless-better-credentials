@@ -23,28 +23,38 @@ function isSsoProfileConfig(c: unknown): c is SsoProfileConfig {
   return true;
 }
 
-const getProfilesFromCredentialsFile = (iniLoader: SsoIniLoader): ConfigData => {
-  const filename = process.env[configOptInEnv];
+const getProfilesFromCredentialsFile = (
+  iniLoader: SsoIniLoader,
+  filename: string | undefined,
+): ConfigData => {
+  const credentialsFilename = filename
+  || (process.env[configOptInEnv] && (process.env[sharedCredentialsFileEnv]
+    || iniLoader.getDefaultFilePath(false)));
 
-  const config = iniLoader.loadFrom({
-    isConfig: true,
-    filename,
-  });
+  try {
+    const config = iniLoader.loadFrom({
+      filename: credentialsFilename,
+    });
 
-  return {
-    config,
-    keys: Object.keys(config),
-    values: Object.values(config),
-  };
+    return {
+      config,
+      keys: Object.keys(config),
+      values: Object.values(config),
+    };
+  } catch (error) {
+    // if using config, assume it is fully descriptive without a credentials file:
+    if (!process.env[configOptInEnv]) throw error;
+  }
+  return { config: {}, keys: [], values: [] };
 };
 
 const getProfilesFromConfigFile = (
   iniLoader: SsoIniLoader,
-  filename: string | undefined,
 ): ConfigData => {
-  const configFilename = filename
-    || (process.env[configOptInEnv] && process.env[sharedCredentialsFileEnv]);
+  const configFilename = process.env[sharedConfigFileEnv] || iniLoader.getDefaultFilePath(true);
+
   const config = iniLoader.loadFrom({
+    isConfig: true,
     filename: configFilename,
   });
 
@@ -80,7 +90,9 @@ const getSsoSessions = (
   filename: string | undefined,
 ) => {
   const filenameForSessions = filename
-    || (process.env[sharedConfigFileEnv] && process.env[sharedCredentialsFileEnv]);
+    || process.env[sharedConfigFileEnv]
+    || iniLoader.getDefaultFilePath(true);
+
   const config = iniLoader.loadSsoSessionsFrom({
     filename: filenameForSessions,
   });
@@ -113,6 +125,7 @@ const addSsoDataToProfiles = (
   return profilesWithSessionData;
 };
 
+/** Fork of AWSUtil.getProfilesFromSharedConfig with SSO sessions handling */
 const getProfilesFromSsoConfig = (
   iniLoader: SsoIniLoader,
   filename?: string,
@@ -122,8 +135,8 @@ const getProfilesFromSsoConfig = (
     profilesFromCredentials: ConfigData;
     ssoSessions: ConfigData;
   } = {
-    profilesFromConfig: getProfilesFromCredentialsFile(iniLoader),
-    profilesFromCredentials: getProfilesFromConfigFile(iniLoader, filename),
+    profilesFromConfig: getProfilesFromConfigFile(iniLoader),
+    profilesFromCredentials: getProfilesFromCredentialsFile(iniLoader, filename),
     ssoSessions: getSsoSessions(iniLoader, filename),
   };
 

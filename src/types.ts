@@ -61,4 +61,5 @@ export type ConfigData = {
 export type SsoIniLoader =
    IniLoader & {
      loadSsoSessionsFrom(options: LoadFileOptions): IniFileContent;
+     getDefaultFilePath(isConfig: boolean): string;
    };
