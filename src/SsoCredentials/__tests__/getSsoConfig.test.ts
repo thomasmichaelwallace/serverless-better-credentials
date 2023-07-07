@@ -21,6 +21,8 @@ sso_account_id = 1234
 sso_role_name = MyRole
   `);
 
+  process.env.AWS_CONFIG_FILE = configPath;
+
   const config = getSsoConfig({ filename: configPath, profile: 'testing' });
 
   expect(config).toEqual({
@@ -55,6 +57,8 @@ test('it loads the sso config from a file with the new SSO login', () => {
       sso_registration_scopes = sso:account:access
   `,
   );
+
+  process.env.AWS_CONFIG_FILE = configPath;
 
   const config = getSsoConfig({ filename: configPath, profile: 'testing' });
 
