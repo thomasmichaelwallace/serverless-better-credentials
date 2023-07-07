@@ -54,6 +54,13 @@ export type SsoProfileConfig = {
 
 export type SsoIniLoader =
    IniLoader & {
-     loadSsoSessionsFrom(options: LoadFileOptions): IniFileContent;
+     /** New method in aws-sdk.
+      *
+      * Considered optional, in case aws-sdk peer-dependency
+      * is not installed at the correct version.
+      *
+      * See https://github.com/aws/aws-sdk-js/pull/4456 to add this method to aws-sdk types.
+      * */
+     loadSsoSessionsFrom?: (options: LoadFileOptions) => IniFileContent;
      getDefaultFilePath(isConfig: boolean): string;
    };

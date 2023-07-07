@@ -81,9 +81,9 @@ const getSsoSessions = (
     || process.env[sharedConfigFileEnv]
     || iniLoader.getDefaultFilePath(true);
 
-  const config = iniLoader.loadSsoSessionsFrom({
+  const config = iniLoader.loadSsoSessionsFrom ? iniLoader.loadSsoSessionsFrom({
     filename: filenameForSessions,
-  });
+  }) : {};
 
   return config;
 };
@@ -149,7 +149,6 @@ export default function getSsoConfig(options: {
     throw new Error('Cannot load SSO credentials without a profile');
   }
   const profiles = getProfilesFromSsoConfig(
-    // https://github.com/aws/aws-sdk-js/pull/4456
     AWSUtil.iniLoader as unknown as SsoIniLoader,
     options.filename,
   );
