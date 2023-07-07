@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import getSsoConfig from '../getSsoConfig';
+import getSsoConfig, { isSsoProfileConfig } from '../getSsoConfig';
 
 // force AWS to run the node_loader so that utils are configured with fs and ini loaders
 // eslint-disable-next-line import/order, import/newline-after-import
@@ -31,6 +31,7 @@ sso_role_name = MyRole
     sso_role_name: 'MyRole',
     sso_start_url: 'https://testing.awsapps.com/start',
   });
+  expect(isSsoProfileConfig(config)).toBe(true);
 
   fs.rmSync(dir, { recursive: true });
 });
@@ -45,8 +46,6 @@ test('it loads the sso config from a file with the new SSO login', () => {
     configPath,
     `
       [testing]
-      sso_start_url = https://testing.awsapps.com/start
-      sso_region = eu-west-1
       sso_account_id = 1234
       sso_role_name = MyRole
       sso_session = test-session
@@ -69,6 +68,7 @@ test('it loads the sso config from a file with the new SSO login', () => {
     sso_session: 'test-session',
     sso_start_url: 'https://testing.awsapps.com/start',
   });
+  expect(isSsoProfileConfig(config)).toBe(true);
 
   fs.rmSync(dir, { recursive: true });
 });
