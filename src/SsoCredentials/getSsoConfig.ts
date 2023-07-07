@@ -1,5 +1,6 @@
 import AWSUtil from 'aws-sdk/lib/util';
-import { ConfigData, SsoIniLoader, SsoProfileConfig } from '../types';
+import { IniFileContent } from 'aws-sdk/lib/shared-ini/ini-loader';
+import { SsoIniLoader, SsoProfileConfig } from '../types';
 
 const configOptInEnv = 'AWS_SDK_LOAD_CONFIG';
 const sharedConfigFileEnv = 'AWS_CONFIG_FILE';
@@ -26,7 +27,7 @@ export function isSsoProfileConfig(c: unknown): c is SsoProfileConfig {
 const getProfilesFromCredentialsFile = (
   iniLoader: SsoIniLoader,
   filename: string | undefined,
-): ConfigData => {
+): IniFileContent => {
   const credentialsFilename = filename
   || (process.env[configOptInEnv] && (process.env[sharedCredentialsFileEnv]
     || iniLoader.getDefaultFilePath(false)));
@@ -36,21 +37,17 @@ const getProfilesFromCredentialsFile = (
       filename: credentialsFilename,
     });
 
-    return {
-      config,
-      keys: Object.keys(config),
-      values: Object.values(config),
-    };
+    return config;
   } catch (error) {
     // if using config, assume it is fully descriptive without a credentials file:
     if (!process.env[configOptInEnv]) throw error;
   }
-  return { config: {}, keys: [], values: [] };
+  return { };
 };
 
 const getProfilesFromConfigFile = (
   iniLoader: SsoIniLoader,
-): ConfigData => {
+): IniFileContent => {
   const configFilename = process.env[sharedConfigFileEnv] || iniLoader.getDefaultFilePath(true);
 
   const config = iniLoader.loadFrom({
@@ -58,37 +55,28 @@ const getProfilesFromConfigFile = (
     filename: configFilename,
   });
 
-  return {
-    config,
-    keys: Object.keys(config),
-    values: Object.values(config),
-  };
+  return config;
 };
 
 const fillProfilesFromConfiguration = (
-  configuration: ConfigData,
+  configuration: IniFileContent,
   profiles: Record<string, SsoProfileConfig>,
 ): Record<string, SsoProfileConfig> => {
-  const { values, keys } = configuration;
-  const newProfiles = profiles;
+  const updatedProfiles = Object.entries(configuration).reduce(
+    (acc, [profileName, profile]) => ({
+      ...acc,
+      [profileName]: { ...acc[profileName], ...profile },
+    }),
+    profiles,
+  );
 
-  if (values && keys) {
-    keys.forEach((profileName, index) => {
-      const foundProfile: Record<string, string> = values[index];
-      newProfiles[profileName] = {
-        ...profiles[profileName],
-        ...foundProfile,
-      };
-    });
-  }
-
-  return newProfiles;
+  return updatedProfiles;
 };
 
 const getSsoSessions = (
   iniLoader: SsoIniLoader,
   filename: string | undefined,
-) => {
+): IniFileContent => {
   const filenameForSessions = filename
     || process.env[sharedConfigFileEnv]
     || iniLoader.getDefaultFilePath(true);
@@ -97,23 +85,18 @@ const getSsoSessions = (
     filename: filenameForSessions,
   });
 
-  return {
-    config,
-    keys: Object.keys(config),
-    values: Object.values(config),
-  };
+  return config;
 };
 
 const addSsoDataToProfiles = (
-  sessionConfiguration: ConfigData,
+  sessionConfiguration: IniFileContent,
   profiles: Record<string, SsoProfileConfig>,
 ) => {
   const profilesWithSessionData = profiles;
 
   Object.entries(profiles).forEach(([profileName, profile]) => {
-    sessionConfiguration.keys.forEach((ssoSessionName) => {
+    Object.entries(sessionConfiguration).forEach(([ssoSessionName, session]) => {
       if (ssoSessionName === profile.sso_session) {
-        const session = sessionConfiguration.config[ssoSessionName];
         profilesWithSessionData[profileName] = {
           ...profile,
           sso_start_url: session.sso_start_url,
@@ -132,9 +115,9 @@ const getProfilesFromSsoConfig = (
   filename?: string,
 ) => {
   const configurations: {
-    profilesFromConfig: ConfigData;
-    profilesFromCredentials: ConfigData;
-    ssoSessions: ConfigData;
+    profilesFromConfig: IniFileContent;
+    profilesFromCredentials: IniFileContent;
+    ssoSessions: IniFileContent;
   } = {
     profilesFromConfig: getProfilesFromConfigFile(iniLoader),
     profilesFromCredentials: getProfilesFromCredentialsFile(iniLoader, filename),
@@ -174,9 +157,9 @@ export default function getSsoConfig(options: {
   if (!isSsoProfileConfig(config)) {
     throw new Error(
       `Profile ${options.profile} does not have valid SSO credentials. Required `
-      + 'parameters "sso_account_id", "sso_region", "sso_role_name", '
-      + '"sso_start_url". Reference: '
-      + 'https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html',
+        + 'parameters "sso_account_id", "sso_region", "sso_role_name", '
+        + '"sso_start_url". Reference: '
+        + 'https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html',
     );
   }
   return config;

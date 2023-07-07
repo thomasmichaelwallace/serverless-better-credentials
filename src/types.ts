@@ -52,12 +52,6 @@ export type SsoProfileConfig = {
   sso_session?: string,
 };
 
-export type ConfigData = {
-  config: IniFileContent;
-  keys: string[];
-  values: Record<string, string>[];
-};
-
 export type SsoIniLoader =
    IniLoader & {
      loadSsoSessionsFrom(options: LoadFileOptions): IniFileContent;
