@@ -5,7 +5,7 @@ const configOptInEnv = 'AWS_SDK_LOAD_CONFIG';
 const sharedConfigFileEnv = 'AWS_CONFIG_FILE';
 const sharedCredentialsFileEnv = 'AWS_SHARED_CREDENTIALS_FILE';
 
-function isSsoProfileConfig(c: unknown): c is SsoProfileConfig {
+export function isSsoProfileConfig(c: unknown): c is SsoProfileConfig {
   if (c === undefined || c === null) return false;
   if (typeof c !== 'object') return false;
   if (
@@ -117,6 +117,7 @@ const addSsoDataToProfiles = (
         profilesWithSessionData[profileName] = {
           ...profile,
           sso_start_url: session.sso_start_url,
+          sso_region: session.sso_region,
         };
       }
     });
