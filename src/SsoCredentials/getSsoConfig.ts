@@ -96,15 +96,14 @@ const addSsoDataToProfiles = (
   sessionConfiguration: ConfigData,
   profiles: Record<string, SsoProfileConfig>,
 ) => {
-  const profileNames = Object.keys(profiles);
   const profilesWithSessionData = profiles;
 
-  profileNames.forEach((profileName) => {
+  Object.entries(profiles).forEach(([profileName, profile]) => {
     sessionConfiguration.keys.forEach((ssoSessionName) => {
-      if (ssoSessionName === profiles[profileName].sso_session) {
+      if (ssoSessionName === profile.sso_session) {
         const session = sessionConfiguration.config[ssoSessionName];
         profilesWithSessionData[profileName] = {
-          ...profiles[profileName],
+          ...profile,
           sso_start_url: session.sso_start_url,
         };
       }
