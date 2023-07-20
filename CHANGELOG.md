@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.2.0...v1.2.1) (2023-07-20)
+
+
+### Bug Fixes
+
+* add sso region when using new sso method ([467212c](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/467212cc6d408d301f267416ecdc343ed2dc4bcd))
+* fix config and credentials file names ([0aa6859](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/0aa6859603e67d25cd89a9e6e9f95412d639353c))
+* handle old aws-sdk versions ([ecc35c0](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/ecc35c024be3f540291ba1ca74e7b52ec675f83c))
+
 ## [1.2.0](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.1.3...v1.2.0) (2023-07-02)
 
 
