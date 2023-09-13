@@ -69,3 +69,16 @@ It's always worth trying the following steps (but feel free to raise an issue if
 
 * If you're using an `~/.aws/config` file, make sure you have `AWS_SDK_LOAD_CONFIG=1` set in your environment
 * Make sure you're not using a global installation of serverless (e.g. run `npm install --save-dev serverless` in your project directory)
+
+If you are having trouble in a CI/CD environment (like GitHub actions), it is probably because you are using a plugin that has migrated to AWS-SDK v3. The easiest workaround is to add a step where you create the `~/.aws/credentials` file, for example:
+
+```bash
+mkdir -p ~/.aws
+rm -rf ~/.aws/credentials
+echo "[YOUR_PROFILE_NAME]" >> ~/.aws/credentials
+echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
+echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+echo "aws_session_token = ${AWS_SESSION_TOKEN}" >> ~/.aws/credentials
+echo "region = eu-west-1" >> ~/.aws/credentials
+echo "output = json" >> ~/.aws/credentials
+```
