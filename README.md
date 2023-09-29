@@ -28,6 +28,16 @@ plugins:
   # - ... other plugins
 ```
 
+The following options are supported:
+
+```yaml
+custom:
+  betterCredentials:
+    # Use this flag to turn off the plugin entirely, which you may want for certain stages.
+    # Defaults to true.
+    enabled: true
+```
+
 ## AWS Single Sign On (SSO) Support
 
 AWS SSO profiles configured to work with the AWS CLI should "just work" when this plugin is enabled. This includes prompting and attempting to automatically open the SSO authorization page in your default browser when the credentials require refreshing.
