@@ -2,6 +2,23 @@ import { IniFileContent, IniLoader, LoadFileOptions } from 'aws-sdk/lib/shared-i
 import Serverless from 'serverless';
 import Aws from 'serverless/plugins/aws/provider/awsProvider';
 
+export type BetterCredentialsPluginOptions = {
+  /**
+   * Use this flag to turn off the plugin entirely, which you may want for certain stages.
+   * Allows strings to make it easier to use environment variables with serverless.
+   * @default true
+   */
+  enabled?: boolean | string;
+};
+
+export type ServerlessWithCustom = Serverless & {
+  service: {
+    custom: {
+      betterCredentials?: BetterCredentialsPluginOptions;
+    }
+  }
+};
+
 // serverless/lib/plugins/aws/provider.js - getCredentials (return type)
 export type ServerlessAwsCredentials = {
   credentials: AWS.Credentials,

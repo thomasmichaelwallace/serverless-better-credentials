@@ -1,17 +1,17 @@
 import { log } from '@serverless/utils/log';
-import Serverless from 'serverless';
 import Plugin from 'serverless/classes/Plugin';
-import { AwsProvider } from './types';
+import { AwsProvider, ServerlessWithCustom } from './types';
 import getCredentials from './utils/getCredentials';
+import evaluateBoolean from './utils/evaluateBoolean';
 
 export default class ServerlessBetterCredentials implements Plugin {
   hooks: { initialize?: () => Promise<void> } = {};
 
   private provider: AwsProvider;
 
-  private serverless: Serverless;
+  private serverless: ServerlessWithCustom;
 
-  constructor(serverless: Serverless) {
+  constructor(serverless: ServerlessWithCustom) {
     this.serverless = serverless;
     this.provider = this.serverless.getProvider('aws') as unknown as AwsProvider;
 
@@ -27,6 +27,11 @@ export default class ServerlessBetterCredentials implements Plugin {
   }
 
   async init() {
+    if (!evaluateBoolean(this.serverless.service.custom.betterCredentials?.enabled, true)) {
+      log.debug('serverless-better-credentials: plugin is disabled - skipping');
+      return;
+    }
+
     // Serverless treats the credentials object as if it is a synchronous and static map of
     // { accessKeyId, secretAccessKey, sessionToken? }.
     // However many types of AWS credentials mutate (refresh) over time and are asynchronous on
