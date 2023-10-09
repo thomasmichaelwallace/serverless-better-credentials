@@ -19,6 +19,15 @@ function isCredentialsOptions(c?: Partial<CredentialsOptions>): c is Credentials
   return hasValidId && (hasValidKey || hasValidToken);
 }
 
+const profileProviderClasses = [
+  AWS.SharedIniFileCredentials,
+  SsoCredentials,
+  AWS.ProcessCredentials,
+  AWS.ECSCredentials,
+  AWS.TokenFileWebIdentityCredentials,
+  AWS.EC2MetadataCredentials,
+];
+
 /*
  * The aws-sdk-js provides a built in mechanism for resolving credentials from multiple sources:
  *  https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CredentialProviderChain.html
@@ -107,17 +116,11 @@ export default class AwsCredentials extends AWS.Credentials {
         });
       };
 
-      this.chain.providers.push(() => {
-        this.hint = `from config ini profile: ${hint} (${profile})`;
-        return new AWS.SharedIniFileCredentials(params);
-      });
-      this.chain.providers.push(() => {
-        this.hint = `from config sso profile: ${hint} (${profile})`;
-        return new SsoCredentials(params);
-      });
-      this.chain.providers.push(() => {
-        this.hint = `from config credential process profile: ${hint} (${profile})`;
-        return new AWS.ProcessCredentials(params);
+      profileProviderClasses.forEach((ProviderClass) => {
+        this.chain.providers.push(() => {
+          this.hint = `from config ${ProviderClass.name}: ${hint} (${profile})`;
+          return new ProviderClass(params);
+        });
       });
     }
   }
