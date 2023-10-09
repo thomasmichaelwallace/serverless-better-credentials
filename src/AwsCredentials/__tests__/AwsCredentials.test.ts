@@ -41,11 +41,17 @@ test('constructs a chainable provider', async () => {
 test('resolves profiles as ini, sso then process', () => {
   const awsCredentials = new AwsCredentials(() => {});
   awsCredentials.addProfile('profile', 'test_profile');
-  expect(awsCredentials.chain.providers).toHaveLength(3);
+  expect(awsCredentials.chain.providers).toHaveLength(6);
   // @ts-expect-error - we know this is callable
   expect(awsCredentials.chain.providers[0]()).toBeInstanceOf(AWS.SharedIniFileCredentials);
   // @ts-expect-error - we know this is callable
   expect(awsCredentials.chain.providers[1]()).toBeInstanceOf(SsoCredentials);
   // @ts-expect-error - we know this is callable
   expect(awsCredentials.chain.providers[2]()).toBeInstanceOf(AWS.ProcessCredentials);
+  // @ts-expect-error - we know this is callable
+  expect(awsCredentials.chain.providers[3]()).toBeInstanceOf(AWS.ECSCredentials);
+  // @ts-expect-error - we know this is callable
+  expect(awsCredentials.chain.providers[4]()).toBeInstanceOf(AWS.TokenFileWebIdentityCredentials);
+  // @ts-expect-error - we know this is callable
+  expect(awsCredentials.chain.providers[5]()).toBeInstanceOf(AWS.EC2MetadataCredentials);
 });
