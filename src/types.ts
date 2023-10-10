@@ -13,7 +13,7 @@ export type BetterCredentialsPluginOptions = {
 
 export type ServerlessWithCustom = Serverless & {
   service: {
-    custom: {
+    custom?: {
       betterCredentials?: BetterCredentialsPluginOptions;
     }
   }

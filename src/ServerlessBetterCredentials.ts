@@ -27,7 +27,7 @@ export default class ServerlessBetterCredentials implements Plugin {
   }
 
   async init() {
-    if (!evaluateBoolean(this.serverless.service.custom.betterCredentials?.enabled, true)) {
+    if (!evaluateBoolean(this.serverless.service.custom?.betterCredentials?.enabled, true)) {
       log.debug('serverless-better-credentials: plugin is disabled - skipping');
       return;
     }
