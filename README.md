@@ -58,6 +58,9 @@ Credentials are resolved in the same order the Serverless Framework currently us
  * from **profile** - serverless.yml > `provider.profile` (unless --aws-profile is specified)
  * from **config** - serverless.yml > `provider.credentials`
  * from **profile** - `AWS_DEFAULT_PROFILE` || `default`
+ * from the ECS provider
+ * from the token file identity
+ * from the EC2 instance metadata service
 
 Where:
  * **profile** credentials resolve against the matching `[profile_name]` configuration:
