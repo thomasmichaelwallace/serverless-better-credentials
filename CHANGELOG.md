@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.3.0...v2.0.0) (2023-10-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* provider order updated to include additional providers
+
+### Features
+
+* add remaining default chain providers to profile chains ([39db5ca](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/39db5ca2a458e8b5819dfba57efaa8afb4be8154))
+
+
+* bump packages ([5cef3bf](https://github.com/thomasmichaelwallace/serverless-better-credentials/commit/5cef3bf6f109852badc4abaa90e2db258a55a32f))
+
 ## [1.3.0](https://github.com/thomasmichaelwallace/serverless-better-credentials/compare/v1.2.1...v1.3.0) (2023-10-22)
 
 
