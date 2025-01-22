@@ -35,7 +35,7 @@
     "@types/serverless": "^3.12.17",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
-    "aws-sdk": "^2.1478.0",
+    "aws-sdk": "^2.1550.0",
     "eslint": "^8.52.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
