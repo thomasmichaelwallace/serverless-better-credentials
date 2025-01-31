@@ -15,6 +15,11 @@ export default class ServerlessBetterCredentials implements Plugin {
     this.serverless = serverless;
     this.provider = this.serverless.getProvider('aws') as unknown as AwsProvider;
 
+    if (!evaluateBoolean(this.serverless.service.custom?.betterCredentials?.enabled, true)) {
+      log.debug('serverless-better-credentials: plugin is disabled - skipping');
+      return;
+    }
+
     if (!this.provider) {
       log.error('serverless-better-credentials: only AWS is supported');
       return;
@@ -27,11 +32,6 @@ export default class ServerlessBetterCredentials implements Plugin {
   }
 
   async init() {
-    if (!evaluateBoolean(this.serverless.service.custom?.betterCredentials?.enabled, true)) {
-      log.debug('serverless-better-credentials: plugin is disabled - skipping');
-      return;
-    }
-
     // Serverless treats the credentials object as if it is a synchronous and static map of
     // { accessKeyId, secretAccessKey, sessionToken? }.
     // However many types of AWS credentials mutate (refresh) over time and are asynchronous on
