@@ -1,3 +1,9 @@
+> [!CAUTION]
+>
+> With the licence changes in serverless v4 and the final release of v3 I am now retiring this plugin. It's been a fun few years.
+> It will continue to work for everyone still stuck using v3, and the [oss-serverless](https://github.com/oss-serverless/serverless) fork.
+> If you are looking for a more stable alternative, I can suggest the [AWS-CDK](https://aws.amazon.com/cdk/).
+
 # Serverless Better Credentials
 
 The Serverless Better Credentials plugin replaces the existing AWS credential resolution mechanism in the Serverless Framework with an extended version that:
